@@ -41,26 +41,22 @@ def getLogger():
       print("Successfully created the logs directory")
 
   now = datetime.datetime.now()
-  log_name = "" + str(now.year) + "." + '{:02d}'.format(now.month) + "." + '{:02d}'.format(now.day) + "-telegramBotSendMessageToGroups.py.log"
+  log_name = (f"{now.year}." + '{:02d}'.format(now.month) + "." +
+              '{:02d}'.format(now.day) +
+              "-telegramBotSendMessageToGroups.py.log")
   log_name = os.path.join(currentDir, "logs", log_name)
   logging.basicConfig(format='%(asctime)s  %(message)s', level=logging.INFO,
                       handlers=[
                       logging.FileHandler(log_name),
                       logging.StreamHandler()
                       ])
-  log = logging.getLogger()
-  return log
+  return logging.getLogger()
 
 # Function that will compose a message based on the JSON
 def composeMessage(log, coinName):
   messageObj = json.load(open(os.path.join(currentDir, messageFile), mode="r"))
-  message = ""
-  for chunk in messageObj["chunks"]:
-    message += random.choice(chunk) + " "
-
-  message = message.replace("<<coin>>", coinName)
-
-  return message
+  message = "".join(f"{random.choice(chunk)} " for chunk in messageObj["chunks"])
+  return message.replace("<<coin>>", coinName)
 
 # Function that sends a message to a chatId
 async def sendTelegramMessage(log, chatId, coinName):
@@ -75,37 +71,45 @@ async def sendTelegramMessage(log, chatId, coinName):
     lastMessageStatus = True
 
   except ChatWriteForbiddenError:
-    log.info("Error <ChatWriteForbiddenError> when trying to send message to: " + chatId)
+    log.info(
+        f"Error <ChatWriteForbiddenError> when trying to send message to: {chatId}"
+    )
     time.sleep(15)
     lastMessageStatus = False
 
   except SlowModeWaitError:
-    log.info("Error <SlowModeWaitError> when trying to send message to: " + chatId)
+    log.info(f"Error <SlowModeWaitError> when trying to send message to: {chatId}")
     time.sleep(30)
     lastMessageStatus = False
 
   except ChatRestrictedError:
-    log.info("Error <ChatRestrictedError> when trying to send message to: " + chatId)
+    log.info(
+        f"Error <ChatRestrictedError> when trying to send message to: {chatId}"
+    )
     time.sleep(30)
     lastMessageStatus = False
 
   except ChannelPrivateError:
-    log.info("Error <ChannelPrivateError> when trying to send message to: " + chatId)
+    log.info(
+        f"Error <ChannelPrivateError> when trying to send message to: {chatId}"
+    )
     time.sleep(90)
     lastMessageStatus = False
 
   except UserBannedInChannelError:
-    log.info("Error <UserBannedInChannelError> when trying to send message to: " + chatId)
+    log.info(
+        f"Error <UserBannedInChannelError> when trying to send message to: {chatId}"
+    )
     time.sleep(7200)
     lastMessageStatus = False
 
   except FloodWaitError:
-    log.info("Error <FloodWaitError> when trying to send message to: " + chatId)
+    log.info(f"Error <FloodWaitError> when trying to send message to: {chatId}")
     time.sleep(450)
     lastMessageStatus = False
 
   except Exception as e:
-    log.info("Error when sending Telegram message: {}".format(e))
+    log.info(f"Error when sending Telegram message: {e}")
     tracebackError = traceback.format_exc()
     log.info(tracebackError)
     lastMessageStatus = False
@@ -124,10 +128,10 @@ def readGroups(log, oldDict):
   # Get group name from
   for group in groups:
     group = group.strip()
-    if group == "" or group == os.linesep:
+    if group in ["", os.linesep]:
       continue
     if len(group.split(",")) != 2:
-      log.info("Skipping group: " + group + " because is not well formatted")
+      log.info(f"Skipping group: {group} because is not well formatted")
       continue
 
     chatId = group.split(",")[0].replace(" ", "")
@@ -149,9 +153,9 @@ def mainFunction():
   try:
     # Break if config files not found
     if os.path.isfile(os.path.join(currentDir, messageFile)) is False:
-      log.info("Message file " + messageFile + " not found. Exiting.")
+      log.info(f"Message file {messageFile} not found. Exiting.")
     if os.path.isfile(os.path.join(currentDir, groupsFile)) is False:
-      log.info("Groups file " + groupsFile + " not found. Exiting.")
+      log.info(f"Groups file {groupsFile} not found. Exiting.")
 
     # Start the Telegram client
     log.info("Start client")
@@ -170,7 +174,7 @@ def mainFunction():
       # Read the groups
       groups = readGroups(log, oldGroupsDict)
 
-      log.info("Groups: " + str(groups))
+      log.info(f"Groups: {str(groups)}")
 
       # Get the group with the oldest message sent
       oldestGroup = ""
@@ -182,7 +186,7 @@ def mainFunction():
       group = oldestGroup
 
       if group != "":
-        log.info("### Processing group: " + group)
+        log.info(f"### Processing group: {group}")
 
         now = time.time()
         if now - groups[group]["lastMessageTimestamp"] < groups[group]["messageInterval"] * 60:
@@ -203,15 +207,16 @@ def mainFunction():
 
       oldGroupsDict = groups
       # Now, we need to sleep in order to not send messages in all the groups from config at once.
-      log.info("Sleeping " + str(sleepMinutesBetweenEachMessageSent * 60) + " seconds because we have finished a complete cycle between groups / send a message.")
+      log.info(
+          f"Sleeping {str(sleepMinutesBetweenEachMessageSent * 60)} seconds because we have finished a complete cycle between groups / send a message."
+      )
       time.sleep(sleepMinutesBetweenEachMessageSent * 60)
 
-  ##### END #####
   except KeyboardInterrupt:
     log.info("Quit")
     sys.exit(0)
   except Exception as e:
-    log.info("Fatal Error: {}".format(e))
+    log.info(f"Fatal Error: {e}")
     tracebackError = traceback.format_exc()
     log.info(tracebackError)
     sys.exit(98)

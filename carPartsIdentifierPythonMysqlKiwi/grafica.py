@@ -11,11 +11,19 @@ from functools import partial
 
 import MySQLdb
 
-cosCumparaturi = ""
 IDMasinaCurenta = ""
 fmt = "{0:7} {1:7} {2:9} {3:6} {4:8} {5:8} {6:20} {7:13} {8:20}"
-cosCumparaturi = cosCumparaturi + fmt.format("Marca", "Model", "Comb.", "Capac", "codMotor", "codPiesa",
-	"numePiesa", "producator", "magazin")
+cosCumparaturi = "" + fmt.format(
+	"Marca",
+	"Model",
+	"Comb.",
+	"Capac",
+	"codMotor",
+	"codPiesa",
+	"numePiesa",
+	"producator",
+	"magazin",
+)
 cosCumparaturi = cosCumparaturi + "\n" + "-"*93 + "\n"
 
 # Adaugat fiecare persoana ce cumpara
@@ -158,11 +166,10 @@ sau exit pentru a iesi""",
 		self.add_widget(self.raport1L)
 		cursor.execute("CALL raport1();")
 
-		text=""
 		fmt = "{0:15} {1:30} {2:10}"
-		text = text + fmt.format("codPiesa", "numePiesa", "CantitateTotala")
+		text = "" + fmt.format("codPiesa", "numePiesa", "CantitateTotala")
 		text = text + "\n" + "-"*65 + "\n"
-		
+
 		for linie in cursor.fetchall():
 			text = text + fmt.format(linie[0], linie[1], linie[2])
 			text = text + '\n'
@@ -183,18 +190,19 @@ sau exit pentru a iesi""",
 	def raport2(self, t):
 		self.clear_widgets()
 
-		
+
 		self.raport2L=Label(text='Mai jos se pot vedea toate piesele grupate dupa magazine',
 							font_size=30,
 							color=(1,0.2,0.2,0.8))
 		self.add_widget(self.raport2L)
 		cursor.execute("CALL raport2();")
 
-		text=""
 		fmt = "{0:10} {1:20} {2:40} {3:15}"
-		text = text + fmt.format("IDMagazin", "numeMagazin", "adresaMagazin", "totalPieseDinMagazin")
+		text = "" + fmt.format(
+			"IDMagazin", "numeMagazin", "adresaMagazin", "totalPieseDinMagazin"
+		)
 		text = text + "\n" + "-"*95 + "\n"
-		
+
 		for linie in cursor.fetchall():
 			text = text + fmt.format(linie[0], linie[1], linie[2], linie[3])
 			text = text + '\n'
@@ -262,9 +270,11 @@ sau exit pentru a iesi""",
 				self.capacitateNumar.bind(on_touch_down=self.primulMeniu)
 				self.ok1 = 0
 
-		
+
 		if self.ok1 == 1:
-			cursor.execute("CALL coduriPiese('%s', '%s', '%s', %s);" % (marcaText, modelText, combustibilText, capacitateText))
+			cursor.execute(
+				f"CALL coduriPiese('{marcaText}', '{modelText}', '{combustibilText}', {capacitateText});"
+			)
 			self.coduriPiese = cursor.fetchall()
 
 			if not self.coduriPiese:
@@ -274,11 +284,13 @@ sau exit pentru a iesi""",
 			else:
 				# Here we will make second menu
 				self.infoMasina = 'Marca masina:'.ljust(29) + marcaText.upper() + '\nModel masina:'.ljust(30) + modelText.upper() \
-							+ '\nCombustibil:'.ljust(30) + combustibilText.upper() + '\nCapcitate:'.ljust(30) + str(capacitateText) + ' cc\n'
+								+ '\nCombustibil:'.ljust(30) + combustibilText.upper() + '\nCapcitate:'.ljust(30) + str(capacitateText) + ' cc\n'
 
 				global IDMasinaCurenta
-				
-				cursor.execute("CALL daMiIDMasina('%s', '%s', '%s', %s);" % (marcaText, modelText, combustibilText, capacitateText))
+
+				cursor.execute(
+					f"CALL daMiIDMasina('{marcaText}', '{modelText}', '{combustibilText}', {capacitateText});"
+				)
 				raspuns = cursor.fetchone()
 				IDMasinaCurenta = raspuns[0]
 				t1=""
@@ -343,7 +355,7 @@ Pentru a cauta variantele pentru filtru de ulei          introdu 4"""
 	def cautaVariante(self, t):
 		varianta = self.varianteWidget.text
 
-		if varianta == '1' or varianta == '2' or varianta == '3' or varianta == '4':
+		if varianta in ['1', '2', '3', '4']:
 			self.codPiesaAleasa = self.coduriPiese[0][int(varianta)]
 			t1=""
 			self.treileaMeniu(self, t1)
@@ -357,7 +369,7 @@ Pentru a cauta variantele pentru filtru de ulei          introdu 4"""
 		# Now we have the self.cofPiesaAleasa which is a value from piese.codPiesa column.
 		# We need to search in piese table and show all the alternatives
 
-		cursor.execute("CALL varianteCodPiesa('%s');" % (self.codPiesaAleasa))
+		cursor.execute(f"CALL varianteCodPiesa('{self.codPiesaAleasa}');")
 		self.variantePiese = cursor.fetchall()
 		if not self.variantePiese:
 			self.clear_widgets()
@@ -374,13 +386,26 @@ Pentru a cauta variantele pentru filtru de ulei          introdu 4"""
 						   color=(1,0.2,0.2,0.8))
 			self.add_widget(self.titlu)
 
-			textVariante=""
 			fmt = "{0:10} {1:10} {2:20} {3:10} {4:10} {5:15}"
-			textVariante = textVariante + fmt.format("IDPiesa", "Producator", "NumePiesa", "CodPiesa", "PretPiesa", "CantitateTotala")
+			textVariante = "" + fmt.format(
+				"IDPiesa",
+				"Producator",
+				"NumePiesa",
+				"CodPiesa",
+				"PretPiesa",
+				"CantitateTotala",
+			)
 			textVariante = textVariante + "\n" + "-"*80 + "\n"
-			
+
 			for variante in self.variantePiese:
-				textVariante = textVariante + fmt.format(variante[0], variante[1], variante[2], variante[3], str(variante[4]) + " lei", variante[5])
+				textVariante = textVariante + fmt.format(
+					variante[0],
+					variante[1],
+					variante[2],
+					variante[3],
+					f"{str(variante[4])} lei",
+					variante[5],
+				)
 				textVariante = textVariante + '\n'
 
 			self.add_widget(Label(text=textVariante,
@@ -394,7 +419,7 @@ Pentru a cauta variantele pentru filtru de ulei          introdu 4"""
 			textPiese = """Pentru a vedea disponibilitatea pieselor in magazinele partenere introdu IDPiesa"""
 
 			self.add_widget(Label(text=textPiese, font_size=20))
-			
+
 			self.disponiblitateWidget = TextInput(multiline=False, write_tab=False, size_hint=[1,0.3])
 			self.add_widget(self.disponiblitateWidget)
 			self.disponiblitateWidget.bind(on_text_validate=self.disponibilitate)
@@ -428,27 +453,23 @@ Pentru a cauta variantele pentru filtru de ulei          introdu 4"""
 			self.ok2 = 0
 
 		if self.ok2 == 1:
-			cursor.execute("CALL locatiePiesa('%s');" % (piesaAleasa))
-			locatiiPiese = cursor.fetchall()
-
-			if not locatiiPiese:
-				self.clear_widgets()
-				self.add_widget(self.piesaNeidentificata)
-				self.piesaNeidentificata.bind(on_touch_down=self.treileaMeniu)
-			else:
-				# Here we will make the fourth menu
-				self.locatiiParsat=""
+			cursor.execute(f"CALL locatiePiesa('{piesaAleasa}');")
+			if locatiiPiese := cursor.fetchall():
 				fmt = "{0:8} {1:8} {2:12} {3:20} {4:30}"
-				self.locatiiParsat = self.locatiiParsat + fmt.format("IDStoc", "IDPiesa", "CantMagazin", "numeMagazin", "adresaMagazin")
+				self.locatiiParsat = "" + fmt.format(
+					"IDStoc", "IDPiesa", "CantMagazin", "numeMagazin", "adresaMagazin"
+				)
 				self.locatiiParsat = self.locatiiParsat + "\n" + "-"*95 + "\n"
-				
+
 				for locatii in locatiiPiese:
 					self.locatiiParsat = self.locatiiParsat + fmt.format(locatii[0], locatii[1], locatii[2], locatii[3], locatii[4])
 					self.locatiiParsat = self.locatiiParsat + '\n'
-				
-				t1=""
-				t2=""
-				self.patruleaMeniu(t1, t2)
+
+				self.patruleaMeniu("", "")
+			else:
+				self.clear_widgets()
+				self.add_widget(self.piesaNeidentificata)
+				self.piesaNeidentificata.bind(on_touch_down=self.treileaMeniu)
 
 	def patruleaMeniu(self, t1, t2):
 

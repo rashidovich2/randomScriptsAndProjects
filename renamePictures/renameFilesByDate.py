@@ -42,62 +42,56 @@ def getLastModifiedDate(file):
   return fileTime
 
 def getDateTaken(file):
-  try:
-    im = Image.open(file)
-    exif = im.getexif()
-    fileTime = exif.get(36867)
-    if fileTime is not None:
-      if int(fileTime[0:4]) < 2000:
-        return None
-      datetime_object = datetime.strptime(fileTime, "%Y:%m:%d %H:%M:%S")
-      epoch = datetime.utcfromtimestamp(0)
-      return (datetime_object - epoch).total_seconds()
-    else:
+    try:
+        im = Image.open(file)
+        exif = im.getexif()
+        fileTime = exif.get(36867)
+        if fileTime is None:
+            return None
+        if int(fileTime[:4]) < 2000:
+            return None
+        datetime_object = datetime.strptime(fileTime, "%Y:%m:%d %H:%M:%S")
+        epoch = datetime.utcfromtimestamp(0)
+        return (datetime_object - epoch).total_seconds()
+    except:
+      #print("ERROR when get dateTaken from: " + file)
       return None
-  except:
-    #print("ERROR when get dateTaken from: " + file)
-    return None
 
 def getMediaDate(file):
-  try:
-    properties = propsys.SHGetPropertyStoreFromParsingName(file)
-    dt = properties.GetValue(pscon.PKEY_Media_DateEncoded).GetValue()
-    if dt is None:
-      return None
-    if not isinstance(dt, datetime):
-      dt = datetime.fromtimestamp(int(dt))
-      dt = dt.replace(tzinfo=pytz.timezone('UTC'))
+    try:
+        properties = propsys.SHGetPropertyStoreFromParsingName(file)
+        dt = properties.GetValue(pscon.PKEY_Media_DateEncoded).GetValue()
+        if dt is None:
+          return None
+        if not isinstance(dt, datetime):
+          dt = datetime.fromtimestamp(int(dt))
+          dt = dt.replace(tzinfo=pytz.timezone('UTC'))
 
-    dt_bucharest = dt.astimezone(pytz.timezone('Europe/Bucharest'))
-    dt_bucharest = dt_bucharest.replace(tzinfo=None)
-    epoch = datetime.utcfromtimestamp(0)
-    fileTime = (dt_bucharest - epoch).total_seconds() + 2*60*60
-    if fileTime < 946684800:
+        dt_bucharest = dt.astimezone(pytz.timezone('Europe/Bucharest'))
+        dt_bucharest = dt_bucharest.replace(tzinfo=None)
+        epoch = datetime.utcfromtimestamp(0)
+        fileTime = (dt_bucharest - epoch).total_seconds() + 2*60*60
+        return None if fileTime < 946684800 else fileTime
+    except:
+      #print("ERROR when get mediaDate from: " + file)
       return None
-    return fileTime
-  except:
-    #print("ERROR when get mediaDate from: " + file)
-    return None
 
 
 def renameFile(root, file, fileTime, printNewName=False):
-  year = str(time.gmtime(fileTime).tm_year)
-  month = str('{:02d}'.format(time.gmtime(fileTime).tm_mon))
-  day = str('{:02d}'.format(time.gmtime(fileTime).tm_mday))
-  hour = str('{:02d}'.format(time.gmtime(fileTime).tm_hour))
-  min = str('{:02d}'.format(time.gmtime(fileTime).tm_min))
-  sec = str('{:02d}'.format(time.gmtime(fileTime).tm_sec))
-  rand = str(random_with_N_digits(5))
-  if len(file.split(".")) > 1:
-    ext = file.split(".")[-1]
-  else:
-    ext = "NOEXT"
-  newName = year + month + day + "_" + hour + min + sec + "_" + rand + "." + ext
-  if(printNewName):
-    print("newName = " + newName)
+    year = str(time.gmtime(fileTime).tm_year)
+    month = '{:02d}'.format(time.gmtime(fileTime).tm_mon)
+    day = '{:02d}'.format(time.gmtime(fileTime).tm_mday)
+    hour = '{:02d}'.format(time.gmtime(fileTime).tm_hour)
+    min = '{:02d}'.format(time.gmtime(fileTime).tm_min)
+    sec = '{:02d}'.format(time.gmtime(fileTime).tm_sec)
+    rand = str(random_with_N_digits(5))
+    ext = file.split(".")[-1] if len(file.split(".")) > 1 else "NOEXT"
+    newName = year + month + day + "_" + hour + min + sec + "_" + rand + "." + ext
+    if printNewName:
+        print(f"newName = {newName}")
 
-  #print("newName = " + newName)
-  os.rename(os.path.join(root, file), os.path.join(root, newName))
+    #print("newName = " + newName)
+    os.rename(os.path.join(root, file), os.path.join(root, newName))
 
 
 def main():

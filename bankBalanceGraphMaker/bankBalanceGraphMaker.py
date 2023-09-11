@@ -26,15 +26,15 @@ def getLogger():
       print("Successfully created the logs directory")
 
   now = datetime.datetime.now()
-  log_name = "" + str(now.year) + "." + '{:02d}'.format(now.month) + "." + '{:02d}'.format(now.day) + "-bankBalanceGraphMaker.log"
+  log_name = (f"{now.year}." + '{:02d}'.format(now.month) + "." +
+              '{:02d}'.format(now.day) + "-bankBalanceGraphMaker.log")
   log_name = os.path.join(baseDir, "logs", log_name)
   logging.basicConfig(format='%(asctime)s  %(message)s', level=logging.NOTSET,
                       handlers=[
                       logging.FileHandler(log_name),
                       logging.StreamHandler()
                       ])
-  log = logging.getLogger()
-  return log
+  return logging.getLogger()
 
 # Replace month name from Romanian to English
 def replaceMonths(log, transaction):
@@ -65,7 +65,7 @@ def processTransaction(log, balanceDict, transaction, fileName):
   res = [ele for ele in months if(ele in transaction)]
 
   # The line does not contain a valid transaction
-  if len(res) == 0:
+  if not res:
     return
   # Hack to treat case when description of the transaction contains name of one month
   if "Detalii:" in transaction:
@@ -88,9 +88,8 @@ def processTransaction(log, balanceDict, transaction, fileName):
   if transactionTimestamp not in balanceDict:
     balanceDict[transactionTimestamp] = {}
     balanceDict[transactionTimestamp][fileName] = balance
-  else:
-    if fileName not in balanceDict[transactionTimestamp]:
-      balanceDict[transactionTimestamp][fileName] = balance
+  elif fileName not in balanceDict[transactionTimestamp]:
+    balanceDict[transactionTimestamp][fileName] = balance
 
 # Function that process one file
 # balanceDict is a dictionary for the transactions
@@ -108,15 +107,8 @@ def processStatement(log, balanceDict, fileName):
 def generateDataPoints(log, balanceDict):
 
   fileList = os.listdir(statementsFolder)
-  latestBalanceForEachAccountDict = {}
-  for file in fileList:
-    latestBalanceForEachAccountDict[file] = 0
-
-  dateList = []
-  for key in balanceDict.keys():
-    dateList.append(key)
-  dateList.sort()
-
+  latestBalanceForEachAccountDict = {file: 0 for file in fileList}
+  dateList = sorted(balanceDict.keys())
   balanceList = []
 
   for iterDate in dateList:
@@ -144,10 +136,9 @@ def plot(log, dataPoints):
   dataPointsX = dataPoints[0]
   dataPointsY = dataPoints[1]
 
-  dataPointsTmp = []
-  for elem in dataPointsX:
-    dataPointsTmp.append(datetime.datetime.fromtimestamp(int(elem)))
-
+  dataPointsTmp = [
+      datetime.datetime.fromtimestamp(int(elem)) for elem in dataPointsX
+  ]
   dataPointsX = dataPointsTmp
 
   #Create the Python figure
@@ -183,7 +174,7 @@ def mainFunction():
 
   try:
     if not os.path.isdir(statementsFolder):
-      log.info("statementsFolder = " + statementsFolder + " not found.")
+      log.info(f"statementsFolder = {statementsFolder} not found.")
       sys.exit(1)
 
     balanceDict = {}
@@ -192,7 +183,7 @@ def mainFunction():
       f = os.path.join(statementsFolder, statementFile)
       # checking if it is a file
       if os.path.isfile(f):
-        log.info("Processing file " + f)
+        log.info(f"Processing file {f}")
         processStatement(log, balanceDict, f)
 
     # Generate datapoints from dict
@@ -201,15 +192,14 @@ def mainFunction():
     # Plot
     plot(log, dataPoints)
 
-  ##### END #####
   except KeyboardInterrupt:
       log.info("Quit")
       sys.exit(0)
   except Exception as e:
-      log.info("FATAL ERROR: {}".format(e))
-      tracebackError = traceback.format_exc()
-      log.info(tracebackError)
-      sys.exit(99)
+    log.info(f"FATAL ERROR: {e}")
+    tracebackError = traceback.format_exc()
+    log.info(tracebackError)
+    sys.exit(99)
 
 
 ##### BODY #####

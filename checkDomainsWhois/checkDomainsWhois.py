@@ -38,22 +38,22 @@ def getLogger():
       print("Successfully created the logs directory")
 
   now = datetime.datetime.now()
-  log_name = "" + str(now.year) + "." + '{:02d}'.format(now.month) + "." + '{:02d}'.format(now.day) + "-checkDomainsWhois.log"
+  log_name = (f"{now.year}." + '{:02d}'.format(now.month) + "." +
+              '{:02d}'.format(now.day) + "-checkDomainsWhois.log")
   log_name = os.path.join(currentDir, "logs", log_name)
   logging.basicConfig(format='%(asctime)s  %(message)s', level=logging.NOTSET,
                       handlers=[
                       logging.FileHandler(log_name),
                       logging.StreamHandler()
                       ])
-  log = logging.getLogger()
-  return log
+  return logging.getLogger()
 
 # Function that sends emails
 def sendMail(log, status, summary, moreInfo):
-  subject = "[" + status + "] "  + scriptPurpose
+  subject = f"[{status}] {scriptPurpose}"
   msg = "Hello,\n\n"
-  msg += "Task: " + scriptPurpose + "\n"
-  msg += "General status: " + status + "\n\n"
+  msg += f"Task: {scriptPurpose}" + "\n"
+  msg += f"General status: {status}" + "\n\n"
 
   msg += "Summary:\n"
   msg += summary
@@ -72,7 +72,7 @@ def sendMail(log, status, summary, moreInfo):
   msg += "Best regards!\n"
   msg = ''.join([i if ord(i) < 128 else '_' for i in msg]) # Convert non ASCII characters
   sender = smtp_user
-  message = "From: " + smtp_user + "\nSubject: {0}\n\n{1}".format(subject, msg)
+  message = f"From: {smtp_user}" + "\nSubject: {0}\n\n{1}".format(subject, msg)
   server = smtplib.SMTP_SSL(smtp_server, 465)
   server.ehlo()
   server.login(smtp_user, smtp_pass)
@@ -103,7 +103,7 @@ def readDomains(log):
 
 # Function that checks if a domain is about to expire
 def isDomainGoingToExpire(log, domain):
-  log.info("Get expiration for domain: " + domain)
+  log.info(f"Get expiration for domain: {domain}")
   try:
     w = whois.whois(domain)
   except Exception as e:
@@ -121,7 +121,7 @@ def isDomainGoingToExpire(log, domain):
   now = datetime.datetime.now()
   timedelta = w.expiration_date - now
   days_to_expire = timedelta.days
-  log.info("Domain remaining days: " + str(days_to_expire))
+  log.info(f"Domain remaining days: {str(days_to_expire)}")
 
   if days_to_expire > daysToExpireDomain:
     return False, days_to_expire
@@ -132,7 +132,7 @@ def isDomainGoingToExpire(log, domain):
 # Function that checks if SSL for a domain is about to expire
 # Also, if we cannot get the SSL certificate, it means that the website is down
 def isSSLGoingToExpire(log, domain):
-  log.info("Get SSL for domain: " + domain)
+  log.info(f"Get SSL for domain: {domain}")
   try:
     ssl_date_fmt = r'%b %d %H:%M:%S %Y %Z'
     context = ssl.create_default_context()
@@ -149,7 +149,7 @@ def isSSLGoingToExpire(log, domain):
     now = datetime.datetime.now()
 
     sslRemainingDays = (expirationDate - now).days
-    log.info("SSL remaining days: " + str(sslRemainingDays))
+    log.info(f"SSL remaining days: {str(sslRemainingDays)}")
 
     if sslRemainingDays > daysToExpireSSL:
       return True, False, sslRemainingDays
@@ -157,7 +157,7 @@ def isSSLGoingToExpire(log, domain):
       return True, True, sslRemainingDays
 
   except Exception as e:
-    log.info("Failed to get SSL: {}".format(e))
+    log.info(f"Failed to get SSL: {e}")
     tracebackError = traceback.format_exc()
     log.info(tracebackError)
     # Return isCurrentWebsiteUp = False, isCurrentSSLGoingToExpire = False (assume innocent, because we do not know the certificate)
@@ -178,7 +178,7 @@ def mainFunction():
 
     # For each domain
     for domain in domainsList:
-      log.info("######### Processing domain: " + domain)
+      log.info(f"######### Processing domain: {domain}")
       # Check it's current state
       isCurrentDomainGoingToExpire, remainingDomainDays = isDomainGoingToExpire(log, domain)
       isCurrentWebsiteUp, isCurrentSSLGoingToExpire, remainingSSLDays = isSSLGoingToExpire(log, domain)
@@ -198,18 +198,15 @@ def mainFunction():
     # Send mail
     if len(websitesDown) + len(domainsToExpire) + len(SSLToExpire) != 0:
       sendMail(log, "ACTION REQUIRED", "Action needed on some domains. See below.", {"websitesDown": websitesDown, "domainsToExpire": domainsToExpire, "SSLToExpire": SSLToExpire})
-    else:
-      # If it is monday, and all sites are good, send an email to ensure that script is running.
-      if datetime.date.today().weekday() == 0:
-        sendMail(log, "OK", "All good. This is just an email (sent only on Mondays to avoid spam), to ensure that the script is still running.", "Nothing to do. Relax :).")
+    elif datetime.date.today().weekday() == 0:
+      sendMail(log, "OK", "All good. This is just an email (sent only on Mondays to avoid spam), to ensure that the script is still running.", "Nothing to do. Relax :).")
 
 
-  ##### END #####
   except KeyboardInterrupt:
     log.info("Quit")
     sys.exit(0)
   except Exception as e:
-    log.info("Fatal Error: {}".format(e))
+    log.info(f"Fatal Error: {e}")
     tracebackError = traceback.format_exc()
     log.info(tracebackError)
     sendMail(log, "FATAL", str(e), str(tracebackError))

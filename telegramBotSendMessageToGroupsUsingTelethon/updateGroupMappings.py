@@ -32,15 +32,15 @@ def getLogger():
       print("Successfully created the logs directory")
 
   now = datetime.datetime.now()
-  log_name = "" + str(now.year) + "." + '{:02d}'.format(now.month) + "." + '{:02d}'.format(now.day) + "-updateGroupMappings.py"
+  log_name = (f"{now.year}." + '{:02d}'.format(now.month) + "." +
+              '{:02d}'.format(now.day) + "-updateGroupMappings.py")
   log_name = os.path.join(currentDir, "logs", log_name)
   logging.basicConfig(format='%(asctime)s  %(message)s', level=logging.INFO,
                       handlers=[
                       logging.FileHandler(log_name),
                       logging.StreamHandler()
                       ])
-  log = logging.getLogger()
-  return log
+  return logging.getLogger()
 
 # For each run, get the updates of the bot and update the group mapping file with the new
 # chat_ids. When a bot is added to a group, an update is accessible, and we parse that, and
@@ -55,10 +55,12 @@ async def updateGroupsMappingHandler(log):
     log.info("##### Run updateGroupsMapping")
     with open(os.path.join(currentDir, groupsMappingFile), 'w') as file:
       for chat in await telegramClient.get_dialogs():
-        file.write("Name: <<<" + chat.name + ">>>, ChatId: <<<" + str(chat.id) + ">>>" + os.linesep)
+        file.write(
+            f"Name: <<<{chat.name}>>>, ChatId: <<<{str(chat.id)}>>>{os.linesep}"
+        )
 
   except Exception as e:
-    log.info("Error when getting Updates for bot: {}".format(e))
+    log.info(f"Error when getting Updates for bot: {e}")
     tracebackError = traceback.format_exc()
     log.info(tracebackError)
 
@@ -70,10 +72,8 @@ def mainFunction():
   try:
     # Create mappings group if not present
     if os.path.isfile(os.path.join(currentDir, groupsMappingFile)) is False:
-      f = open(os.path.join(currentDir, groupsMappingFile), "a")
-      f.write("")
-      f.close()
-
+      with open(os.path.join(currentDir, groupsMappingFile), "a") as f:
+        f.write("")
     # Start the Telegram client
     log.info("Start client")
     global telegramClient
@@ -83,12 +83,11 @@ def mainFunction():
     # Update the groups where the user is in.
     updateGroupsMapping(log)
 
-  ##### END #####
   except KeyboardInterrupt:
     log.info("Quit")
     sys.exit(0)
   except Exception as e:
-    log.info("Fatal Error: {}".format(e))
+    log.info(f"Fatal Error: {e}")
     tracebackError = traceback.format_exc()
     log.info(tracebackError)
     sys.exit(98)

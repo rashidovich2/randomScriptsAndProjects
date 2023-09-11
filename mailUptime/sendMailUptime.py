@@ -21,9 +21,7 @@ def sendMail():
   print("Sending mail")
   now = str(datetime.datetime.now())
   subject = "[localnetflix] Do you still need me chief?"
-  msg = "Hello chief,\n\n"
-  msg += "I, localnetflix, I am still up\n"
-
+  msg = "Hello chief,\n\n" + "I, localnetflix, I am still up\n"
   msg += "Best regards,\n"
   msg += "Your localnetflix"
 

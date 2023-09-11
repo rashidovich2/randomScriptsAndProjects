@@ -31,7 +31,7 @@ template = (
 )
 
 def generateMessage(channelId):
-  print('* Bot invoked in channel: ' + str(channelId) + '*')
+  print(f'* Bot invoked in channel: {str(channelId)}*')
 
   # Get info from config file
   config = configparser.ConfigParser()
@@ -46,28 +46,37 @@ def generateMessage(channelId):
   coinSymbol = response["symbol"]
   price = response["price"]
   marketCap = str(int(response["marketcap"]))
-  dailyChange = str('{:.2f}'.format(response["daily_change"]))
+  dailyChange = '{:.2f}'.format(response["daily_change"])
   website = response["website"]
   address = response["address"]
   network = response["network"]
 
   if network == "BSC":
-    viewLink = "https://dextools.io/app/bsc/pair-explorer/" + address
-    buyLink = "https://pancakeswap.finance/swap#/swap?outputCurrency=" + address
+    viewLink = f"https://dextools.io/app/bsc/pair-explorer/{address}"
+    buyLink = f"https://pancakeswap.finance/swap#/swap?outputCurrency={address}"
   elif network == "ETH":
-    viewLink = "https://dextools.io/app/uniswap/pair-explorer/" + address
-    buyLink = "https://app.uniswap.org/#/swap?outputCurrency=" + address
+    viewLink = f"https://dextools.io/app/uniswap/pair-explorer/{address}"
+    buyLink = f"https://app.uniswap.org/#/swap?outputCurrency={address}"
   elif network == "MATIC":
-    viewLink = "https://dextools.io/app/polygon/pair-explorer/" + address
-    buyLink = "https://app.sushi.com/swap?outputCurrency=" + address
+    viewLink = f"https://dextools.io/app/polygon/pair-explorer/{address}"
+    buyLink = f"https://app.sushi.com/swap?outputCurrency={address}"
   else:
     viewLink = "https://freshcoins.io"
     buyLink = "https://freshcoins.io"
 
-  voteLink = "https://freshcoins.io/coins/" + coinSlug
+  voteLink = f"https://freshcoins.io/coins/{coinSlug}"
 
-  messageText = template.format(coinName=coinName, coinSymbol=coinSymbol, price=price, marketCap=marketCap, dailyChange=dailyChange,website=website, viewLink=viewLink, buyLink=buyLink, voteLink=voteLink)
-  return messageText
+  return template.format(
+      coinName=coinName,
+      coinSymbol=coinSymbol,
+      price=price,
+      marketCap=marketCap,
+      dailyChange=dailyChange,
+      website=website,
+      viewLink=viewLink,
+      buyLink=buyLink,
+      voteLink=voteLink,
+  )
 
 print("Start client")
 client = TelegramClient('bot', api_id, api_hash)

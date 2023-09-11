@@ -11,12 +11,11 @@ smtp_server = "smtp.gmail.com"
 try:
   now = str(datetime.datetime.now())
   subject = "New connection to home VPN"
-  msg = "Hello chief,\n\n"
-  msg += "New connection detected:\n"
-  msg += "User: " + str(sys.argv[1]) + "\n"
-  msg += "Public IP: " + str(sys.argv[2]) + "\n"
-  msg += "Assigned IP: " + str(sys.argv[3]) + "\n"
-  msg += "Timestamp: " + str(now) + "\n\n"
+  msg = "Hello chief,\n\n" + "New connection detected:\n"
+  msg += f"User: {str(sys.argv[1])}" + "\n"
+  msg += f"Public IP: {str(sys.argv[2])}" + "\n"
+  msg += f"Assigned IP: {str(sys.argv[3])}" + "\n"
+  msg += f"Timestamp: {now}" + "\n\n"
   msg += "Best regards,\n"
   msg += "Your humble Pi"
 

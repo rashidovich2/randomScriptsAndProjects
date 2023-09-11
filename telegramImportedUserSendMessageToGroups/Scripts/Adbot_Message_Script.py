@@ -13,11 +13,11 @@ proxy_password = ""
 
 USE_PROXY = True
 api_id = 
-api_hash = '' 
+api_hash = ''
 phone = '+'    
 
 if USE_PROXY:
-    px_session = str(phone) + str(api_id) + str(api_hash)
+    px_session = phone + api_id + api_hash
     proxy = proxy_utils.get_session_proxy(px_session)
     if not proxy:
         try:
@@ -56,12 +56,7 @@ for chat in chats:
     except:
         continue
 
-market_groups = []
-
-for g in groups:
-    market_groups.append(g.id)
-
-
+market_groups = [g.id for g in groups]
 message = '''
 
 AD MSG

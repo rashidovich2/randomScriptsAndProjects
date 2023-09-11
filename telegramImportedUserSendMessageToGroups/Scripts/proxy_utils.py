@@ -41,8 +41,7 @@ def create_proxy(type_str, host, port, user="", password=""):
     )
 
 def get_session_proxy(session):
-    proxies = get_proxies()
-    if proxies:
+    if proxies := get_proxies():
         for proxy in proxies:
             if proxy["session"] == session:
                 return proxy["proxy"]
@@ -50,8 +49,7 @@ def get_session_proxy(session):
 
 def get_proxies():
     try:
-        proxies = pickle.load(open('session.pkl', "rb"))
-        return proxies
+        return pickle.load(open('session.pkl', "rb"))
     except:
         return []
 

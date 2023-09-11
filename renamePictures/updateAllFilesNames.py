@@ -17,15 +17,12 @@ def random_with_N_digits(n):
     return randint(range_start, range_end)
 
 def main():
-  for root, subdirs, files in os.walk(dirPath):
-    for file in files:
-      if len(file.split(".")) > 1:
-        ext = file.split(".")[-1]
-      else:
-        ext = "NOEXT"
-      order = file[9:15]
-      newName = str(year) + str(month) + str(day) + "_" + order + str(random_with_N_digits(5)) + "." + ext
-      os.rename(os.path.join(root, file), os.path.join(root, newName))
+    for root, subdirs, files in os.walk(dirPath):
+        for file in files:
+            ext = file.split(".")[-1] if len(file.split(".")) > 1 else "NOEXT"
+            order = file[9:15]
+            newName = str(year) + str(month) + str(day) + "_" + order + str(random_with_N_digits(5)) + "." + ext
+            os.rename(os.path.join(root, file), os.path.join(root, newName))
 
 if __name__ == "__main__":
   main()

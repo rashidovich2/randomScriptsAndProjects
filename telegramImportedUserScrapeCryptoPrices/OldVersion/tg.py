@@ -44,9 +44,9 @@ config.read(path)
 
 
 def genMessage(channelId):
-    print('*'+channelId+'*')
+    print(f'*{channelId}*')
     config = configparser.ConfigParser()
-    config.read(path)    
+    config.read(path)
     price  = config.get(channelId, "price")
     coinName = config.get(channelId, "coinName")
     coinShortName = config.get(channelId, "coinShortName")

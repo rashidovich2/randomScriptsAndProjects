@@ -27,7 +27,6 @@ class TelegramEcho:
 
     self.__last = None
     self.__last_time = None
-    pass
 
   def run(self):
     """
@@ -64,11 +63,8 @@ class TelegramEcho:
         # finally printing the outgoing message
         self.__print_outgoing(outgoing)
 
-        pass
       except (HTTPError, IndexError):
         continue
-      pass
-    pass
 
   def __handle_incoming(self) -> Dict[str, Union[int, str]]:
     """
@@ -98,7 +94,6 @@ class TelegramEcho:
         incoming["message"]["from"].get("last_name", ""))
     print("\tMessage ID: %d" % incoming["message"]["message_id"])
     print("-" * os.get_terminal_size().columns)
-    pass
 
   def __handle_outgoing(self, chat_id: int,
               message_txt: str) -> Dict[str, Union[int, str]]:
@@ -136,7 +131,6 @@ class TelegramEcho:
     print("\tFrom: %s" % outgoing["from"]["first_name"])
     print("\tMessage ID: %d" % outgoing["message_id"])
     print("-" * os.get_terminal_size().columns)
-    pass
 
   pass
 

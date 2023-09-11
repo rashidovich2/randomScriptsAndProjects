@@ -22,7 +22,7 @@ api_hash = ''
 phone = ''
 
 if USE_PROXY:
-    px_session = str(phone) + str(api_id) + str(api_hash)
+    px_session = phone + api_id + api_hash
     proxy = proxy_utils.get_session_proxy(px_session)
     if not proxy:
         try:

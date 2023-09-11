@@ -5,7 +5,7 @@ from math import log
 # I have changed os.path.dirname with os.path.abspath in order to construct correctly the path
 words_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'words.txt')
 words = open(words_path).read().split()
-wordcost = dict((k, log((i+1)*log(len(words)))) for i,k in enumerate(words))
+wordcost = {k: log((i+1)*log(len(words))) for i,k in enumerate(words)}
 maxword = max(len(x) for x in words)
 
 def Infer_Spaces(s):
